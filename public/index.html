@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ledgerly | Expense tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <a class="brand" href="/">LEDGERLY<span>.</span></a>
+        <div class="session-area">
+          <span id="user-email"></span>
+          <button id="sign-out" class="text-button hidden" type="button">Sign out</button>
+        </div>
+      </header>
+
+      <section id="auth-view" class="auth-layout">
+        <div class="intro">
+          <p class="kicker">PERSONAL FINANCE / 01</p>
+          <h1>Make every<br><em>rupee</em> count.</h1>
+          <p class="intro-copy">A small, private ledger powered by Postgres. Sign in to keep your data separated by Row Level Security.</p>
+        </div>
+        <form id="auth-form" class="panel auth-panel">
+          <p class="panel-label">WELCOME BACK</p>
+          <h2>Enter your ledger</h2>
+          <label>Email<input name="email" type="email" placeholder="you@example.com" required></label>
+          <label>Password<input name="password" type="password" placeholder="At least 6 characters" minlength="6" required></label>
+          <button id="auth-submit" class="primary-button" type="submit"><span id="auth-submit-label">Sign in</span><span>↗</span></button>
+          <button id="auth-toggle" class="text-button" type="button">Create a new account</button>
+          <p id="auth-message" class="message" role="status"></p>
+        </form>
+      </section>
+
+      <section id="app-view" class="hidden">
+        <div class="dashboard-heading">
+          <div><p class="kicker">PERSONAL LEDGER / <span id="view-label">OVERVIEW</span></p><h1 id="page-title">Good to see you.</h1></div>
+          <div class="heading-actions"><label class="month-picker">MONTH<input id="month-filter" type="month"></label><button id="add-expense-shortcut" class="primary-button compact-button" type="button">+ Add expense</button></div>
+        </div>
+        <nav class="view-tabs" aria-label="Dashboard views"><button class="view-tab active" data-view="overview" type="button">Overview</button><button class="view-tab" data-view="reports" type="button">Reports</button></nav>
+
+        <div id="overview-view">
+          <div class="stats-grid">
+            <article class="stat-card stat-card-dark"><span>THIS MONTH</span><strong id="month-total">Rs 0.00</strong><small id="month-count">0 expenses</small></article>
+            <article class="stat-card"><span>TOP CATEGORY</span><strong id="top-category">--</strong><small>by total spend</small></article>
+            <article class="stat-card"><span>ROWS IN VIEW</span><strong id="row-count">0</strong><small>protected by RLS</small></article>
+          </div>
+          <div class="content-grid">
+            <section id="entry-panel" class="panel form-panel">
+              <div class="panel-heading"><div><p class="panel-label">NEW ENTRY</p><h2>Log an expense</h2></div><span class="number-mark">01</span></div>
+              <form id="expense-form">
+                <label>Description<input name="title" placeholder="Morning coffee" required maxlength="120"></label>
+                <div class="two-col"><label>Amount<input name="amount" type="number" min="0.01" step="0.01" placeholder="0.00" required></label><label>Date<input name="spent_on" type="date" required></label></div>
+                <label>Category<div class="category-line"><select id="expense-category" name="category"></select><button id="manage-categories" class="icon-button" type="button" title="Manage categories" aria-label="Manage categories">+</button></div></label>
+                <label>Note <span class="optional">OPTIONAL</span><textarea name="notes" rows="3" placeholder="What was it for?"></textarea></label>
+                <button class="primary-button" type="submit">Add to ledger <span>↗</span></button>
+                <p id="expense-message" class="message" role="status"></p>
+              </form>
+            </section>
+            <section class="panel list-panel">
+              <div class="panel-heading"><div><p class="panel-label">TRANSACTIONS</p><h2>Recent spending</h2></div><select id="category-filter" class="compact-select"><option value="all">All categories</option></select></div>
+              <div id="expense-list" class="expense-list"><p class="empty-state">Your ledger is waiting for its first entry.</p></div>
+            </section>
+          </div>
+        </div>
+
+        <div id="reports-view" class="hidden">
+          <div class="report-grid">
+            <section class="panel report-panel"><div class="panel-heading"><div><p class="panel-label">SPEND MIX</p><h2>Where it goes</h2></div><span id="report-total" class="report-total">Rs 0.00</span></div><div id="category-report" class="category-report"></div></section>
+            <section class="panel report-panel"><div class="panel-heading"><div><p class="panel-label">SIX MONTHS</p><h2>Monthly rhythm</h2></div></div><div id="trend-report" class="trend-report"></div></section>
+          </div>
+          <section class="panel report-note"><span class="report-note-icon">SQL</span><div><strong>Reports are computed in Postgres</strong><p>The dashboard calls `expense_report` and `monthly_expense_trend` RPC functions. Try changing the SQL and watch the view evolve.</p></div></section>
+        </div>
+      </section>
+      <div id="category-modal" class="modal-backdrop hidden"><section class="panel modal-panel"><div class="panel-heading"><div><p class="panel-label">PERSONALIZE</p><h2>Your categories</h2></div><button id="close-category-modal" class="close-button" type="button" aria-label="Close">×</button></div><form id="category-form" class="category-form"><label>Category name<input name="name" maxlength="32" placeholder="Subscriptions" required></label><label>Color<input name="color" type="color" value="#d9f27a"></label><button class="primary-button" type="submit">Create category <span>↗</span></button></form><div id="category-list" class="category-list"></div><p id="category-message" class="message" role="status"></p></section></div>
+      <footer><span>EXPENSES / SUPABASE / POSTGRES</span><span id="connection-status">CONNECTING...</span></footer>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
+    <script src="/app.js"></script>
+  </body>
+</html>
