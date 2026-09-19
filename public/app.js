@@ -21,6 +21,7 @@ const categoryList = document.querySelector('#category-list');
 const categoryMessage = document.querySelector('#category-message');
 let isSignUp = false;
 let categories = [];
+let activeUserId = null;
 
 const defaultCategories = [
   { name: 'Food', color: '#f6ae8a' }, { name: 'Transport', color: '#b8d9f5' },
@@ -106,8 +107,12 @@ categoryModal.addEventListener('click', (event) => { if (event.target === catego
 document.querySelector('#sign-out').addEventListener('click', () => supabaseClient.auth.signOut({ scope: 'local' }));
 
 function updateView(user) {
-  const signedIn = Boolean(user); authView.classList.toggle('hidden', signedIn); appView.classList.toggle('hidden', !signedIn); document.querySelector('#sign-out').classList.toggle('hidden', !signedIn); document.querySelector('#user-email').textContent = signedIn ? user.email : '';
-  if (signedIn) { monthFilter.value = new Date().toISOString().slice(0, 7); expenseForm.elements.spent_on.value = new Date().toISOString().slice(0, 10); loadCategories().then(loadDashboard); }
+  const signedIn = Boolean(user);
+  authView.classList.toggle('hidden', signedIn); appView.classList.toggle('hidden', !signedIn); document.querySelector('#sign-out').classList.toggle('hidden', !signedIn); document.querySelector('#user-email').textContent = signedIn ? user.email : '';
+  if (!signedIn) { activeUserId = null; return; }
+  if (activeUserId === user.id) return;
+  activeUserId = user.id;
+  monthFilter.value = new Date().toISOString().slice(0, 7); expenseForm.elements.spent_on.value = new Date().toISOString().slice(0, 10); loadCategories().then(loadDashboard);
 }
 
 function escapeHtml(value) { return String(value).replace(/[&<>'"]/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;' }[character])); }

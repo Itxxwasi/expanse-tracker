@@ -1,3 +1,10 @@
 node_modules/
 .env
 npm-debug.log*
+
+# Local AI agent tooling and instructions
+.agents/
+skills-lock.json
+**/AGENTS.md
+**/.agents.md
+**/copilot-instructions.md
